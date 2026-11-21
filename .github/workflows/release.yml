@@ -74,7 +74,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y rpm binutils libarchive-tools libgtk-3-0 libnss3 libxss1 libxtst6 libasound2t64 libgbm1 xvfb
+          sudo apt-get install -y rpm binutils dbus-x11 libarchive-tools libgtk-3-0 libnss3 libxss1 libxtst6 libasound2t64 libgbm1 xvfb
       - run: bun install --frozen-lockfile
       - name: Build installers
         shell: bash
@@ -99,7 +99,8 @@ jobs:
           appdir="dist/linux${{ matrix.arch == 'arm64' && '-arm64' || '' }}-unpacked"
           sudo chown root:root "$appdir/chrome-sandbox"
           sudo chmod 4755 "$appdir/chrome-sandbox"
-          xvfb-run -a "$appdir/copy-my-things" --smoke-test
+          dbus-run-session -- xvfb-run -a "$appdir/copy-my-things" --smoke-test 2>&1 | tee packaged-smoke.log
+          grep -q ELECTRON_SMOKE_PASS packaged-smoke.log
       - name: Archive corresponding native sources
         if: matrix.platform == 'linux' && matrix.arch == 'x64'
         run: tar -czf dist/Copy-My-Things-native-sources.tar.gz -C release-support native-source

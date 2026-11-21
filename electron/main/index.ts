@@ -40,7 +40,10 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const smoke = process.argv.includes('--smoke-test')
-if (smoke) app.setPath('userData', mkdtempSync(join(tmpdir(), 'copy-my-things-smoke-')))
+if (smoke) {
+  app.disableHardwareAcceleration()
+  app.setPath('userData', mkdtempSync(join(tmpdir(), 'copy-my-things-smoke-')))
+}
 app.setName('Copy My Things')
 if (process.platform === 'win32') app.setAppUserModelId('app.copymythings.desktop')
 // Electron uses the compositor portal when available; a failure is reported rather than hidden.
