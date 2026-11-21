@@ -77,7 +77,12 @@ jobs:
           sudo apt-get install -y rpm binutils libarchive-tools libgtk-3-0 libnss3 libxss1 libxtst6 libasound2t64 libgbm1 xvfb
       - run: bun install --frozen-lockfile
       - name: Build installers
-        run: bun run package --${{ matrix.arch }}
+        shell: bash
+        run: |
+          for name in CSC_LINK CSC_KEY_PASSWORD WIN_CSC_LINK WIN_CSC_KEY_PASSWORD APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+            if [ -z "${!name}" ]; then unset "$name"; fi
+          done
+          bun run package --${{ matrix.arch }}
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_ARCH: ${{ matrix.arch }}
@@ -90,7 +95,11 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       - name: Smoke test packaged Linux app
         if: runner.os == 'Linux'
-        run: xvfb-run -a dist/linux${{ matrix.arch == 'arm64' && '-arm64' || '' }}-unpacked/copy-my-things --smoke-test
+        run: |
+          appdir="dist/linux${{ matrix.arch == 'arm64' && '-arm64' || '' }}-unpacked"
+          sudo chown root:root "$appdir/chrome-sandbox"
+          sudo chmod 4755 "$appdir/chrome-sandbox"
+          xvfb-run -a "$appdir/copy-my-things" --smoke-test
       - name: Archive corresponding native sources
         if: matrix.platform == 'linux' && matrix.arch == 'x64'
         run: tar -czf dist/Copy-My-Things-native-sources.tar.gz -C release-support native-source
