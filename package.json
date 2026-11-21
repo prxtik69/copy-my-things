@@ -19,7 +19,10 @@
     "test:electron": "bun run build && bun scripts/run.ts smoke",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test:electron:dev": "bun scripts/run.ts dev -- --smoke-test"
+    "test:electron:dev": "bun scripts/run.ts dev -- --smoke-test",
+    "release:prepare": "bun scripts/prepare-release.ts",
+    "package": "bun run build && bun run release:prepare && electron-builder --config electron-builder.config.cjs --publish never",
+    "package:dir": "bun run build && bun run release:prepare && electron-builder --config electron-builder.config.cjs --dir --publish never"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.1",
@@ -42,6 +45,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.3.0",
     "electron": "^45.4.1",
+    "electron-builder": "26.18.0",
     "electron-vite": "^6.0.0",
     "prettier": "^3.10.1",
     "tailwindcss": "^4.3.5",
@@ -54,5 +58,15 @@
     "esbuild",
     "better-sqlite3",
     "uiohook-napi"
-  ]
+  ],
+  "author": {
+    "name": "Pratik",
+    "email": "pratikdeshpande007pvd@gmail.com"
+  },
+  "homepage": "https://github.com/prxtik69/copy-my-things",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/prxtik69/copy-my-things.git"
+  },
+  "desktopName": "copy-my-things.desktop"
 }

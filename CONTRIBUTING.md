@@ -13,6 +13,6 @@ bun run test:electron
 
 The Electron check needs a desktop session and briefly uses the clipboard. Follow the platform checklist in docs/TESTING.md for native changes. Do not enable monitoring without the operator's opt-in. Never commit personal databases, tokens, passwords, clipboard captures, or keystroke traces. Use temporary profiles and harmless test values.
 
-Document tested OS/architecture/session combinations honestly. Changes to native dependencies need maintenance, license, prebuild, and Electron compatibility checks. Keep startup/background work event-driven; no telemetry, servers, daemons, polling, installers, or release automation are included in this development milestone.
+Document tested OS/architecture/session combinations honestly. Changes to native dependencies need maintenance, license, prebuild, and Electron compatibility checks. Keep startup/background work event-driven; keep telemetry and polling out of the desktop app. Packaging and release changes should follow docs/RELEASING.md.
 
 UI changes should retain keyboard operation, visible focus indicators, readable light/dark themes, and truthful disabled-feature explanations. All visible controls must perform their stated action.

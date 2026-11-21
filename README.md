@@ -2,7 +2,9 @@
 
 A local-first desktop clipboard utility built with Electron, React, and TypeScript. Save text once, find it from a compact launcher, and copy it wherever you work. Optional typed triggers copy text to the clipboard. They **never paste, replace text, or erase the trigger**.
 
-This is a runnable development application. There are no installers, release jobs, auto-updaters, accounts, telemetry, remote fonts, or cloud services.
+A free, open-source desktop app for Windows, Linux, and macOS. Download installers from [GitHub Releases](https://github.com/prxtik69/copy-my-things/releases), or run it from source. There are no accounts, telemetry, remote fonts, or cloud services.
+
+Release builds and signing setup are documented in [docs/RELEASING.md](docs/RELEASING.md).
 
 ## Run locally
 
@@ -13,7 +15,7 @@ bun install
 bun run dev
 ```
 
-For a production-mode local build (not an installer):
+For a production-mode local build:
 
 ```sh
 bun run build
