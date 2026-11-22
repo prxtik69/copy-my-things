@@ -224,6 +224,19 @@ export function Settings({
             </Button>
           )}
           <SettingRow
+            title="When I type a trigger"
+            description="Expansion removes the trigger and pastes your text using ⌘V on Mac or Ctrl+V on Windows/Linux. The text stays on your clipboard. Apps with a different paste shortcut can use Copy to clipboard."
+          >
+            <select
+              aria-label="Typed trigger action"
+              value={draft.triggerAction}
+              onChange={(e) => update('triggerAction', e.target.value as 'expand' | 'copy')}
+            >
+              <option value="expand">Replace with snippet</option>
+              <option value="copy">Copy to clipboard</option>
+            </select>
+          </SettingRow>
+          <SettingRow
             title="Trigger prefix"
             description="Updates existing triggers to the new prefix."
           >
@@ -467,9 +480,9 @@ export function Settings({
           Copy My Things <code>v{snapshot.version}</code>
         </p>
         <p className="hint">
-          A small, local-first clipboard utility. No account, telemetry, cloud, or automatic paste.
-          Original code licensed under MIT. Built for Windows, Linux, and macOS; native platform
-          validation is documented in README.md.
+          Your everyday text, one shortcut away. No account, telemetry, or cloud. Original code
+          licensed under MIT. Built for Windows, Linux, and macOS; native platform validation is
+          documented in README.md.
         </p>
         <SettingRow
           title="Current resource snapshot"

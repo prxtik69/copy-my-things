@@ -1,9 +1,9 @@
-Save your everyday text, find it quickly, and copy it wherever you work.
+Type `;email` in a text field and it turns into your saved address. Version 0.2.0 adds in-place expansion for typed triggers, including multiline replies and Unicode text.
 
-- Snippet library with categories, favorites, search, and a quick launcher.
-- Optional typed commands that copy matching snippets to the clipboard.
-- Encrypted vault, light/dark themes, and guided setup.
-- Launch at login on Windows, Linux, and macOS.
+- When typed triggers are enabled, **Replace with snippet** is now the default. To keep the previous behavior, choose **Settings → Triggers → When I type a trigger → Copy to clipboard**. Manual copy and Quick Search still work as before.
+- Expansion uses the system clipboard and sends ⌘V on macOS or Ctrl+V on Windows/Linux. Use copy mode in apps with a different paste shortcut. Sensitive clipboard expiration still applies.
+- Unlock your vault before expanding a sensitive snippet. If it’s locked, the trigger stays in place; return to the field after unlocking and type it again.
+- Try expansion in the onboarding practice field without enabling global keyboard monitoring.
 
 ## Downloads
 

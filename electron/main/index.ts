@@ -266,6 +266,30 @@ async function copySnippet(id: string): Promise<{ copied: boolean }> {
     new Notification({ title: 'Copy My Things', body: 'Snippet copied to clipboard.' }).show()
   return { copied: true }
 }
+async function activateTypedSnippet(id: string, trigger?: string): Promise<unknown> {
+  // Editing a snippet must never activate its trigger. Onboarding has its own
+  // local practice field and does not need native keyboard output.
+  if (mainWindow?.isFocused() || launcher?.isFocused()) return
+  if (!trigger) return copySnippet(id)
+  const snippet = repository.row(id)
+  if (snippet.sensitive && !vault.status().unlocked) {
+    openMain()
+    feedback('Unlock your vault in the manager, then type the trigger again.', true)
+    return
+  }
+  const settings = repository.settings()
+  const content = repository.content(id)
+  const expanded = await adapter.replaceTrigger(trigger.length, () =>
+    clip.copy(content, !!snippet.sensitive, settings.secretTimeout),
+  )
+  if (!expanded) {
+    feedback('Expansion cancelled. Release the keys and type your trigger again.', true)
+    return
+  }
+  if (settings.copyFeedback) feedback(`Expanded ${snippet.name}`)
+  if (settings.notifications && notificationsAvailable())
+    new Notification({ title: 'Copy My Things', body: 'Snippet expansion sent.' }).show()
+}
 function rebuildTray(): void {
   if (!tray || tray.isDestroyed() || !repository) return
   const settings = repository.settings(),
@@ -612,7 +636,9 @@ else {
       clip = new ClipboardService(clipboard, () =>
         feedback('Could not clear the expired clipboard', true),
       )
-      engine = new TriggerEngine(adapter, copySnippet, (message) => feedback(message, true))
+      engine = new TriggerEngine(adapter, activateTypedSnippet, (message) =>
+        feedback(message, true),
+      )
       try {
         engine.configure(repository.list(), repository.settings())
       } catch {

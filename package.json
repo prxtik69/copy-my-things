@@ -1,6 +1,6 @@
 {
   "name": "copy-my-things",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A local-first clipboard utility with snippets, a quick launcher, and an encrypted vault",
   "license": "MIT",
   "private": true,

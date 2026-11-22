@@ -119,6 +119,13 @@ export async function runSmoke(context: SmokeContext): Promise<void> {
     await waitForUI(window, '!!document.querySelector(".tutorial-success")')
     const tutorialText = 'https://github.com/your-username'
     assert.equal(
+      await window.webContents.executeJavaScript(
+        'document.getElementById("tutorial-practice").value',
+      ),
+      tutorialText,
+      'Typed tutorial command must expand in place',
+    )
+    assert.equal(
       await clipboard.readText(),
       tutorialText,
       'Typed tutorial command must really copy',

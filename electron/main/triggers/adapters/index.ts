@@ -3,17 +3,21 @@ import { systemPreferences, shell } from 'electron'
 import type { KeyInput } from '../matcher'
 import type { Capability } from '../../../../shared/contracts'
 import type { UiohookKeyboardEvent } from 'uiohook-napi'
+import { TriggerReplacement } from '../replacement'
 type HookModule = typeof import('uiohook-napi')
 export interface KeyboardAdapter {
   availability(): Capability
   start(consume: (key: KeyInput) => void): void
   stop(): void
+  replaceTrigger(length: number, prepareClipboard: () => Promise<void>): Promise<boolean>
+  cancelReplacement(): void
 }
 const nativeRequire = createRequire(import.meta.url)
 /** Native physical keys are mapped ONLY after explicit US-layout acknowledgement. No text events are retained. */
 class NativeAdapter implements KeyboardAdapter {
   private hook?: HookModule
   private cleanup?: () => void
+  private replacement?: TriggerReplacement
   constructor(private platform: NodeJS.Platform) {}
   availability(): Capability {
     if (this.platform === 'darwin' && !systemPreferences.isTrustedAccessibilityClient(false))
@@ -42,6 +46,12 @@ class NativeAdapter implements KeyboardAdapter {
     if (!capability.available || !this.hook) throw new Error(capability.detail)
     const { uIOhook, UiohookKey: K } = this.hook
     const down = new Set<number>()
+    const replacement = new TriggerReplacement({
+      keysReleased: () => down.size === 0,
+      backspace: () => uIOhook.keyTap(K.Backspace),
+      paste: () => uIOhook.keyTap(K.V, [this.platform === 'darwin' ? K.Meta : K.Ctrl]),
+    })
+    this.replacement = replacement
     let caps = false
     const map = new Map<number, [string, string]>()
     for (const ch of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -67,6 +77,7 @@ class NativeAdapter implements KeyboardAdapter {
       if (code) map.set(code, [pairs[i][0], pairs[i][1]])
     })
     const keydown = (event: UiohookKeyboardEvent): void => {
+      if (!replacement.input()) return
       const repeat = down.has(event.keycode)
       down.add(event.keycode)
       if (event.keycode === K.CapsLock) {
@@ -90,6 +101,7 @@ class NativeAdapter implements KeyboardAdapter {
       down.delete(event.keycode)
     }
     const mouse = (): void => {
+      if (!replacement.input()) return
       down.clear()
       consume({ reset: true })
     }
@@ -97,6 +109,8 @@ class NativeAdapter implements KeyboardAdapter {
     uIOhook.on('keyup', keyup)
     uIOhook.on('mousedown', mouse)
     this.cleanup = () => {
+      replacement.cancel()
+      this.replacement = undefined
       uIOhook.removeListener('keydown', keydown)
       uIOhook.removeListener('keyup', keyup)
       uIOhook.removeListener('mousedown', mouse)
@@ -118,6 +132,12 @@ class NativeAdapter implements KeyboardAdapter {
       this.cleanup = undefined
     }
   }
+  replaceTrigger(length: number, prepareClipboard: () => Promise<void>): Promise<boolean> {
+    return this.replacement?.replace(length, prepareClipboard) ?? Promise.resolve(false)
+  }
+  cancelReplacement(): void {
+    this.replacement?.cancel()
+  }
 }
 export class WindowsAdapter extends NativeAdapter {
   constructor() {
@@ -135,6 +155,10 @@ export class MacOSAdapter extends NativeAdapter {
   }
 }
 export class LinuxWaylandAdapter implements KeyboardAdapter {
+  async replaceTrigger(): Promise<boolean> {
+    return false
+  }
+  cancelReplacement(): void {}
   availability(): Capability {
     return {
       available: false,

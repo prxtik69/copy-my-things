@@ -1,6 +1,10 @@
 # Copy My Things
 
-A local-first desktop clipboard utility built with Electron, React, and TypeScript. Save text once, find it from a compact launcher, and copy it wherever you work. Optional typed triggers copy text to the clipboard. They **never paste, replace text, or erase the trigger**.
+A local-first desktop clipboard utility built with Electron, React, and TypeScript. Save text once, find it from a compact launcher, and reuse it wherever you work. Optional typed triggers replace the shortcut you type with its saved text. Choose **Copy to clipboard** in Settings → Triggers if you prefer to paste manually.
+
+Expansion backspaces the trigger, then sends the app’s paste shortcut (⌘V on macOS, Ctrl+V on Windows/Linux). It supports Unicode and multiline values through the clipboard, which retains the inserted text; sensitive clipboard expiration still applies. Unlock sensitive snippets before typing their triggers. Locked triggers leave your text untouched and ask you to unlock and retry. Further keystrokes, mouse clicks, pausing monitoring, or opening the manager cancel a pending expansion before deletion. Trigger matching is disabled inside the manager and launcher; onboarding uses a local practice field.
+
+Expansion requires native typed-trigger support on Windows, macOS (with permissions), or Linux X11. Wayland remains unsupported. The target must accept the standard paste shortcut; terminals using Ctrl+Shift+V and applications that block simulated input should use clipboard mode. Focus changes without input cannot always be detected, so finish typing in the same field. The app cannot confirm whether another application accepted a paste; use Undo and manual copy if the target rejects it.
 
 A free, open-source desktop app for Windows, Linux, and macOS. Download installers from [GitHub Releases](https://github.com/prxtik69/copy-my-things/releases), or run it from source. There are no accounts, telemetry, remote fonts, or cloud services.
 

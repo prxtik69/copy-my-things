@@ -24,6 +24,8 @@ describe('trigger service and search', () => {
         consume = listener
       }),
       stop: vi.fn(),
+      replaceTrigger: vi.fn(async () => true),
+      cancelReplacement: vi.fn(),
     }
     const activate = vi.fn(async () => {}),
       engine = new TriggerEngine(adapter, activate, vi.fn())
@@ -33,9 +35,19 @@ describe('trigger service and search', () => {
     engine.configure([snippet], { ...defaults, monitoring: true, usLayoutConfirmed: true })
     for (const text of ';email') consume({ text })
     await Promise.resolve()
-    expect(activate).toHaveBeenCalledWith('one')
+    expect(activate).toHaveBeenCalledWith('one', ';email')
+    engine.configure([snippet], {
+      ...defaults,
+      monitoring: true,
+      usLayoutConfirmed: true,
+      triggerAction: 'copy',
+    })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    for (const text of ';email') consume({ text })
+    await Promise.resolve()
+    expect(activate).toHaveBeenLastCalledWith('one', undefined)
     engine.stop()
-    expect(adapter.stop).toHaveBeenCalledOnce()
+    expect(adapter.stop).toHaveBeenCalledTimes(2)
   })
   it('matches names, triggers and fuzzy subsequences without searching values', () => {
     expect(searchSnippets([snippet], [], 'exeml')[0]).toBe(snippet)

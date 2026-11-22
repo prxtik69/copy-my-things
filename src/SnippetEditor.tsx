@@ -168,7 +168,7 @@ export function SnippetEditor({
             />
             <small className={errors.trigger ? 'error' : ''}>
               {errors.trigger ||
-                `Start with ${snapshot.settings.prefix}. Triggers copy; they never paste.`}
+                `Start with ${snapshot.settings.prefix}. ${snapshot.settings.triggerAction === 'expand' ? 'Typing it replaces the trigger with your text.' : 'Typing it copies your text.'}`}
             </small>
           </div>
           <div className="field">

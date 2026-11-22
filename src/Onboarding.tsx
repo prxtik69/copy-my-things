@@ -187,6 +187,7 @@ export function Onboarding({
       const result = await api.request('snippet:copy', snippetId)
       if (!result.copied) throw new Error('This snippet could not be copied. Try again.')
       setCopied(true)
+      if (snapshot.settings.triggerAction === 'expand') setPractice(content)
     } catch (e) {
       setError((e as Error).message)
     } finally {
@@ -282,7 +283,10 @@ export function Onboarding({
         {step === 1 && (
           <div className="tutorial-practice">
             <p>
-              Type <code>{effectiveSnippet?.trigger ?? trigger}</code>, then paste below.
+              Type <code>{effectiveSnippet?.trigger ?? trigger}</code>
+              {snapshot.settings.triggerAction === 'expand'
+                ? ' to expand your text. You can also paste it below.'
+                : ', then paste below.'}
             </p>
             <div className="field">
               <label htmlFor="tutorial-practice">Try your command</label>
@@ -303,7 +307,10 @@ export function Onboarding({
                     modified: e.ctrlKey || e.metaKey || e.altKey,
                     reset: ['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Delete'].includes(e.key),
                   })
-                  if (match) void activate()
+                  if (match) {
+                    if (snapshot.settings.triggerAction === 'expand') e.preventDefault()
+                    void activate()
+                  }
                 }}
               />
             </div>
@@ -312,7 +319,9 @@ export function Onboarding({
                 <span className="success-tick">
                   <Check size={15} />
                 </span>
-                Copied to clipboard
+                {snapshot.settings.triggerAction === 'expand'
+                  ? 'Text expanded · also on your clipboard'
+                  : 'Copied to clipboard'}
               </div>
             )}
             <div className="field">

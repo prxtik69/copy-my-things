@@ -8,7 +8,7 @@ export class TriggerEngine {
   private idle?: ReturnType<typeof setTimeout>
   constructor(
     private adapter: KeyboardAdapter,
-    private activate: (id: string) => Promise<unknown>,
+    private activate: (id: string, trigger?: string) => Promise<unknown>,
     private report: (message: string) => void,
   ) {}
   configure(snippets: Snippet[], settings: Settings): void {
@@ -24,14 +24,24 @@ export class TriggerEngine {
       this.idle.unref?.()
       if (id && !this.inFlight.has(id)) {
         this.inFlight.add(id)
-        this.activate(id)
-          .catch(() => this.report('Could not copy snippet. Open the app to check its status.'))
+        this.activate(
+          id,
+          settings.triggerAction === 'expand'
+            ? snippets.find((s) => s.id === id)?.trigger
+            : undefined,
+        )
+          .catch(() =>
+            this.report(
+              'Could not activate snippet. If text was removed, use Undo, then copy it from the manager.',
+            ),
+          )
           .finally(() => this.inFlight.delete(id))
       }
     })
     this.active = true
   }
   reset(): void {
+    this.adapter.cancelReplacement()
     this.matcher.reset()
     clearTimeout(this.idle)
   }

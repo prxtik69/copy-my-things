@@ -17,7 +17,7 @@ export function getCapabilities(
         : process.arch,
     clipboard: {
       available: true,
-      detail: 'Electron system clipboard. Copies only; never pastes or replaces text.',
+      detail: 'System clipboard for copying and typed-trigger expansion.',
     },
     notifications: {
       available: Notification.isSupported(),

@@ -36,6 +36,7 @@ export const settingsSchema = z
     notifications: z.boolean().default(false),
     copyFeedback: z.boolean().default(true),
     monitoring: z.boolean().default(false),
+    triggerAction: z.enum(['expand', 'copy']).default('expand'),
     usLayoutConfirmed: z.boolean().default(false),
     prefix: z
       .string()
