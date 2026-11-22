@@ -19,6 +19,8 @@ Use `bun run package --x64` or `bun run package --arm64` to select an architectu
 
 The workflow validates the version, TypeScript, tests, and formatting before packaging. Packaged Linux builds run the Electron smoke test inside Xvfb. Installer files are collected only after all matrix builds pass, then `SHA256SUMS.txt` is generated and uploaded with them. Each release also includes corresponding native-hook source. Draft builds do not appear in the website's latest-release API.
 
+Retries are safe for the same version: an existing published release is left unchanged and the publish job succeeds. An existing draft receives replacement assets and checksums, keeping its edited notes; it is published only when the draft option is disabled. New releases are created as drafts first so interrupted uploads can be resumed before publication. Manual and tag-triggered runs for the same version share a concurrency group. To ship changed application code after publication, bump the package version and use a new matching tag. Rerun a workflow from the updated `master` branch to use these retry rules; rerunning an older run still uses its original workflow.
+
 Stable filenames are `Copy-My-Things-windows-<arch>-setup.exe`, `Copy-My-Things-macos-<arch>.dmg` / `.zip`, and `Copy-My-Things-linux-<arch>.AppImage` / `.deb`, where `<arch>` is `x64` or `arm64`. The website and terminal commands depend on these names.
 
 ## Signing

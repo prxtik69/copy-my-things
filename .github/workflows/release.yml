@@ -18,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.event.inputs.version || github.ref_name }}
+  group: release-${{ inputs.version && format('v{0}', inputs.version) || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -134,12 +134,31 @@ jobs:
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.validate.outputs.tag }}
           DRAFT: ${{ github.event_name == 'workflow_dispatch' && inputs.draft }}
         shell: bash
         run: |
-          flags=()
-          if [ "$DRAFT" = "true" ]; then flags+=(--draft); fi
-          gh release create "$TAG" release-artifacts/* \
-            --target "$GITHUB_SHA" --title "Copy My Things $TAG" \
-            --notes-file docs/RELEASE_NOTES.md "${flags[@]}"
+          # Listing also finds drafts. API/authentication errors must fail the job.
+          releases=$(gh api --paginate --slurp "repos/$GH_REPO/releases")
+          state=$(jq -r --arg tag "$TAG" '
+            [.[][] | select(.tag_name == $tag)][0] |
+            if . == null then "missing" elif .draft then "draft" else "published" end
+          ' <<< "$releases")
+
+          if [ "$state" = "published" ]; then
+            echo "::notice::Release $TAG is already published; keeping its assets unchanged. Use a new version for a new release."
+            exit 0
+          fi
+
+          if [ "$state" = "missing" ]; then
+            gh release create "$TAG" --draft \
+              --target "$GITHUB_SHA" --title "Copy My Things $TAG" \
+              --notes-file docs/RELEASE_NOTES.md
+          fi
+
+          # Resume incomplete drafts, including uploads interrupted by a prior run.
+          gh release upload "$TAG" release-artifacts/* --clobber
+          if [ "$DRAFT" != "true" ]; then
+            gh release edit "$TAG" --draft=false
+          fi
